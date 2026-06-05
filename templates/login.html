@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A.E.G.I.S - Secure Login</title>
+    <style>
+        body {
+            background-color: #0b101a; /* خلفية كحلية غامقة جداً */
+            color: #c9d1d9;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+        
+        /* تأثير خطوط في الخلفية ليعطي طابع سيبراني */
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(0, 170, 255, 0.03) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(0, 170, 255, 0.03) 1px, transparent 1px);
+            background-size: 30px 30px;
+            z-index: -1;
+        }
+
+        .login-container {
+            background-color: #121926;
+            padding: 40px;
+            border-radius: 12px;
+            border: 1px solid #0056b3;
+            box-shadow: 0 0 25px rgba(0, 170, 255, 0.2);
+            width: 350px;
+            text-align: center;
+            position: relative;
+        }
+
+        /* خط أزرق منور فوق المربع */
+        .login-container::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            height: 2px;
+            background-color: #00aaff;
+            box-shadow: 0 0 15px #00aaff;
+        }
+
+        .lock-icon {
+            font-size: 45px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 15px rgba(0, 170, 255, 0.5);
+        }
+
+        .login-container h2 {
+            color: #00aaff;
+            margin-bottom: 5px;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px rgba(0, 170, 255, 0.3);
+        }
+
+        .subtitle {
+            font-size: 12px;
+            color: #6e7a8a;
+            margin-bottom: 30px;
+            letter-spacing: 1px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #8b949e;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            background-color: #0b101a;
+            border: 1px solid #1f2a3d;
+            color: #00aaff;
+            border-radius: 6px;
+            outline: none;
+            box-sizing: border-box;
+            font-family: inherit;
+            font-size: 15px;
+            transition: 0.3s;
+        }
+
+        .input-group input:focus {
+            border-color: #00aaff;
+            box-shadow: 0 0 10px rgba(0, 170, 255, 0.2);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #0056b3;
+            color: #ffffff;
+            border: 1px solid #007bff;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            font-family: inherit;
+            letter-spacing: 1px;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+
+        .login-btn:hover {
+            background-color: #007bff;
+            box-shadow: 0 0 15px rgba(0, 170, 255, 0.6);
+        }
+
+        .error-message {
+            color: #ff4d4d;
+            background-color: rgba(255, 77, 77, 0.1);
+            border: 1px solid #ff4d4d;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 20px;
+            font-size: 14px;
+            display: inline-block;
+            width: 100%;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-container">
+    <div class="lock-icon">🛡️</div>
+    <h2>A.E.G.I.S SOC</h2>
+    <div class="subtitle">RESTRICTED ACCESS AREA</div>
+
+    <form action="/login" method="POST">
+        <div class="input-group">
+            <label for="username">Administrator ID</label>
+            <input type="text" id="username" name="username" required autocomplete="off" placeholder="Enter ID">
+        </div>
+        
+        <div class="input-group">
+            <label for="password">Passcode</label>
+            <input type="password" id="password" name="password" required placeholder="••••••••">
+        </div>
+
+        <button type="submit" class="login-btn">AUTHENTICATE</button>
+
+        <!-- الجزء ده بيظهر بس لو اليوزر كتب باسوورد غلط -->
+        {% if error %}
+        <div class="error-message">⚠️ {{ error }}</div>
+        {% endif %}
+    </form>
+</div>
+
+</body>
+</html>

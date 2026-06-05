@@ -1,1 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AEGIS - Security Dashboard</title>
+    <style>
+        /* Global Styles - Neon Blue Cyber Theme */
+        body {
+            background-color: #050505;
+            background-image: 
+                linear-gradient(rgba(0, 170, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 170, 255, 0.03) 1px, transparent 1px);
+            background-size: 30px 30px;
+            color: #00aaff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 10px;
+            overflow: hidden; 
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: background-color 0.5s ease;
+        }
 
+        /* Header Section */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #003366;
+            padding: 5px 20px;
+            margin-bottom: 10px;
+            position: relative;
+        }
+        .logo-area h1 { margin: 0; font-size: 22px; letter-spacing: 2px; color: #00aaff; text-shadow: 0 0 10px #00aaff; }
+        .logo-area span { font-size: 10px; color: #888; text-transform: uppercase; }
+        
+        /* التعديل: الكلمة بقت ثابتة تماماً بدون أي حركة */
+        .system-name { 
+            font-weight: 900; 
+            color: #00aaff; 
+            font-size: 34px; 
+            letter-spacing: 8px; 
+            text-shadow: 0 0 8px #00aaff; /* إضاءة ثابتة */
+            transition: all 0.5s ease; /* عشان اللون يتغير بنعومة */
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        /* Statistics Row */
+        .stats-bar { display: flex; gap: 15px; margin-bottom: 15px; }
+        .stat-item {
+            background: rgba(10, 15, 20, 0.8);
+            border-left: 3px solid #00aaff;
+            padding: 10px 20px; flex: 1; border-radius: 4px;
+            box-shadow: inset 0 0 10px rgba(0, 170, 255, 0.02);
+            transition: border-color 0.5s ease;
+        }
+        .stat-item.danger { border-left-color: #ff0000; }
+        .stat-label { font-size: 10px; color: #aaa; text-transform: uppercase; margin-bottom: 5px; }
+        .stat-value { font-size: 20px; font-weight: bold; font-family: 'Courier New', Courier, monospace; }
+
+        /* Main Content Layout */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 320px 1fr 380px;
+            gap: 15px;
+            flex-grow: 1;
+            padding-bottom: 10px;
+            overflow: hidden;
+        }
+
+        .panel {
+            background: rgba(10, 12, 15, 0.9);
+            border: 1px solid #003366;
+            border-radius: 5px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 0 15px rgba(0, 170, 255, 0.03);
+            transition: border-color 0.5s ease;
+        }
+        .panel-header {
+            background: #0a0f14;
+            padding: 8px 15px; font-size: 12px; font-weight: bold;
+            border-bottom: 1px solid #003366;
+            color: #33bbff; text-transform: uppercase;
+        }
+
+        /* Left Column: Radar + Metrics */
+        .radar-box {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 15px; background: radial-gradient(circle, #0a0f14, #000); 
+            border-bottom: 1px dashed #003366;
+        }
+        .radar {
+            width: 150px; height: 150px; border-radius: 50%;
+            border: 2px solid #00aaff; position: relative; overflow: hidden; 
+            background: repeating-radial-gradient(circle, transparent, transparent 15px, rgba(0, 170, 255, 0.1) 16px, rgba(0, 170, 255, 0.1) 17px), radial-gradient(circle, #050505, #000a1a);
+            box-shadow: 0 0 30px rgba(0, 170, 255, 0.5); margin-bottom: 15px;
+            transition: all 0.5s ease;
+        }
+        .radar::after {
+            content: ''; position: absolute; top: 50%; left: 50%; width: 100%; height: 100%;
+            background: linear-gradient(45deg, rgba(0, 170, 255, 0) 50%, rgba(0, 170, 255, 0.6) 100%);
+            transform-origin: 0 0; animation: scan 2s linear infinite;
+            transition: background 0.5s ease;
+        }
+        @keyframes scan { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .metrics-container { padding: 15px; font-family: monospace; font-size: 11px; color: #888; }
+        .metric-row { margin-bottom: 8px; }
+        .metric-label { display: flex; justify-content: space-between; margin-bottom: 3px; }
+        .bar-bg { width: 100%; background: #1a2233; height: 6px; border-radius: 3px; overflow: hidden; }
+        .bar-fill { height: 100%; background: #00aaff; transition: width 0.5s ease; } 
+
+        /* Middle Column: Terminal */
+        .terminal {
+            flex-grow: 1; background: #000; padding: 15px;
+            font-family: 'Courier New', Courier, monospace; font-size: 12px; color: #00aaff; overflow-y: auto;
+        }
+        .log-entry { margin-bottom: 5px; }
+        .log-warn { color: #ffcc00; font-weight: bold; }
+
+        /* Right Column: Nmap + Target Info */
+        .target-info {
+            padding: 15px; border-bottom: 1px dashed #003366;
+            font-family: monospace; font-size: 12px;
+        }
+        .intel-box {
+            flex-grow: 1; background: #050505; padding: 15px;
+            font-family: 'Courier New', Courier, monospace; font-size: 11px; color: #e0e0e0; overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        /* 
+           =========================================
+           إخفاء شريط التمرير (Scrollbar)
+           =========================================
+        */
+        .terminal::-webkit-scrollbar, .intel-box::-webkit-scrollbar {
+            display: none; /* إخفاء في متصفحات Chrome و Safari و Edge */
+        }
+        .terminal, .intel-box {
+            -ms-overflow-style: none;  /* إخفاء في متصفح IE و Edge القديم */
+            scrollbar-width: none;  /* إخفاء في متصفح Firefox */
+        }
+
+        /* 
+           =========================================
+           Critical Threat Visual States (حالة الخطر)
+           =========================================
+        */
+        body.threat-active { background-color: #100000; }
+        body.threat-active header { border-color: #400; }
+        body.threat-active h1 { color: #ff0000; text-shadow: 0 0 20px #ff0000; }
+        body.threat-active .stat-item { border-left-color: #ff0000; }
+        body.threat-active .panel { border-color: #400; }
+
+        /* تعديل: تلوين اسم الشركة A.E.G.I.S بالأحمر المضيء وقت الخطر */
+        body.threat-active .system-name {
+            color: #ff0000;
+            text-shadow: 0 0 15px #ff0000;
+        }
+
+        /* تعديل: تلوين الرادار والدائرة اللي بتلف بالأحمر وقت الخطر */
+        body.threat-active .radar {
+            border-color: #ff0000;
+            box-shadow: 0 0 30px rgba(255, 0, 0, 0.6);
+            background: repeating-radial-gradient(circle, transparent, transparent 15px, rgba(255, 0, 0, 0.1) 16px, rgba(255, 0, 0, 0.1) 17px), radial-gradient(circle, #050000, #1a0000);
+        }
+        body.threat-active .radar::after {
+            background: linear-gradient(45deg, rgba(255, 0, 0, 0) 50%, rgba(255, 0, 0, 0.6) 100%);
+        }
+        
+        .system-alert {
+            background: #400; color: #f00; padding: 10px; text-align: center; font-weight: bold; font-size: 12px;
+            animation: blink 1s infinite;
+        }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
+        .disarm-btn { 
+            background: #ff0000; color: white; border: 2px solid #ffaaaa; 
+            padding: 8px 20px; font-size: 14px; font-weight: bold; cursor: pointer; 
+            border-radius: 5px; text-shadow: 0 0 5px black; box-shadow: 0 0 10px red; 
+            transition: 0.2s; margin-top: 8px; width: 100%;
+            animation: none;
+        }
+        .disarm-btn:hover { background: #cc0000; transform: scale(1.02); }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo-area">
+        <h1>OBSIDIAN SPHINX SECURITY</h1>
+        <span>Advanced Defense Solutions</span>
+    </div>
+    
+    <div class="system-name">A.E.G.I.S</div>
+    
+    <div>TIME: <span id="clock" style="font-family: monospace; font-weight: bold; color: #aaa;"></span></div>
+</header>
+
+<div class="stats-bar">
+    <div class="stat-item">
+        <div class="stat-label">System Integrity</div>
+        <div class="stat-value" style="color: #00aaff;">OPTIMAL</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-label">Total Threats Detected</div>
+        <div class="stat-value" id="totalAttacks">0</div>
+    </div>
+    <div class="stat-item danger">
+        <div class="stat-label">Blocked Identities</div>
+        <div class="stat-value" id="blockedCount" style="color: #ff0000;">0</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-label">Hardware Link</div>
+        <div class="stat-value" id="arduinoStatus">WAITING...</div>
+    </div>
+</div>
+
+<div class="dashboard-grid">
+    <div class="panel">
+        <div class="panel-header">System Core & Metrics</div>
+        <div class="radar-box">
+            <div class="radar"></div>
+            <div class="status-box">
+                <span style="color:#888;">STATUS: </span>
+                <span id="statusTextActive" class="status-value active">ACTIVE SCANNING</span>
+            </div>
+        </div>
+        <div class="metrics-container">
+            <div class="metric-row">
+                <div class="metric-label"><span>SERVER CPU LOAD</span><span id="cpuVal">0%</span></div>
+                <div class="bar-bg"><div class="bar-fill" id="cpuBar" style="width: 0%;"></div></div>
+            </div>
+            <div class="metric-row">
+                <div class="metric-label"><span>SERVER MEMORY</span><span id="ramVal">0%</span></div>
+                <div class="bar-bg"><div class="bar-fill" id="ramBar" style="width: 0%;"></div></div>
+            </div>
+            
+            <div class="metric-group" style="margin-top: 15px; border-top: 1px solid rgba(0, 191, 255, 0.3); padding-top: 10px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="color: #66b3ff; font-size: 10px; font-weight: bold; letter-spacing: 1px;">HONEYPOT STATUS</span>
+                    <span id="honeypot-alert" style="color: #00ff00; font-size: 12px; font-weight: bold; text-shadow: 0 0 5px #00ff00;">SAFE (No Intrusion)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel">
+        <div class="panel-header">Live Traffic & Security Logs</div>
+        <div class="terminal" id="liveLogs">
+            <div class="log-entry">Dashboard initialized. Standby for server link...</div>
+        </div>
+        
+        <div class="system-alert" id="threatAlert" style="display:none; flex-direction: column; align-items: center;">
+            <span id="alertMessage">CRITICAL THREAT DETECTED - FIREWALL ENGAGED</span>
+            <button class="disarm-btn" onclick="disarmSystem()">🛑 DISARM ALARM</button>
+        </div>
+    </div>
+
+    <div class="panel">
+        <div class="panel-header">Target Intelligence (Nmap)</div>
+        <div class="target-info">
+            <div style="color:#888; margin-bottom: 5px;">CURRENT TARGET LOCK:</div>
+            <div style="font-size: 16px; color:#00aaff; font-weight:bold; margin-bottom: 5px;" id="blockedIP">NONE</div>
+            
+            <!-- NEW: Quick Intel Section -->
+            <div id="quickIntel" style="margin-top: 10px; display: none; background: rgba(0, 170, 255, 0.05); padding: 10px; border-radius: 4px; border: 1px solid #003366; font-family: monospace; font-size: 11px;">
+                <div style="font-size: 9px; color: #888; margin-bottom: 5px; letter-spacing: 1px;">EXTRACTED IDENTITIES:</div>
+                <div style="margin-bottom: 3px;">MAC: <span id="intelMac" style="color: #fff;">SCANNING...</span></div>
+                <div style="margin-bottom: 3px;">VENDOR: <span id="intelVendor" style="color: #fff;">SCANNING...</span></div>
+            </div>
+        </div>
+        <div class="intel-box" id="nmapOutput">
+            Standby for target acquisition...
+            <br><br>
+            <span style="color: #444;">Deep packet inspection and Nmap profiling will initiate automatically upon firewall drop rule engagement.</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    // الوقت بيشتغل فوراً وميختفيش وقت الريلود
+    function updateTime() {
+        document.getElementById('clock').innerText = new Date().toLocaleTimeString(); 
+    }
+    updateTime();
+    setInterval(updateTime, 1000);
+
+    function disarmSystem() {
+        fetch('/api/disarm', { method: 'POST' });
+    }
+
+    setInterval(async () => {
+        try {
+            const response = await fetch('/api/stats');
+            const data = await response.json();
+
+            const statusLabel = document.getElementById('arduinoStatus');
+            statusLabel.innerText = "CONNECTED";
+            statusLabel.style.color = "#00aaff";
+
+            document.getElementById('cpuVal').innerText = data.cpu + '%';
+            document.getElementById('cpuBar').style.width = data.cpu + '%';
+            document.getElementById('ramVal').innerText = data.ram + '%';
+            document.getElementById('ramBar').style.width = data.ram + '%';
+
+            document.getElementById('totalAttacks').innerText = data.total_attacks;
+            document.getElementById('blockedCount').innerText = data.blocked_count;
+            document.getElementById('blockedIP').innerText = data.last_ip;
+
+            // Honeypot UI Update
+            const honeypotElement = document.getElementById('honeypot-alert');
+            const isHoneypotBreached = data.honeypot_alert && data.honeypot_alert.includes("BREACHED");
+
+            if (isHoneypotBreached) {
+                honeypotElement.textContent = data.honeypot_alert;
+                honeypotElement.style.color = "#ff0000"; 
+                honeypotElement.style.textShadow = "0 0 10px #ff0000";
+            } else {
+                honeypotElement.textContent = "SAFE (No Intrusion)";
+                honeypotElement.style.color = "#00ff00"; 
+                honeypotElement.style.textShadow = "0 0 5px #00ff00";
+            }
+
+            // Quick Intel Update
+            const quickIntelBox = document.getElementById('quickIntel');
+            if (data.attacker_mac && data.attacker_mac !== "UNKNOWN") {
+                quickIntelBox.style.display = 'block';
+                document.getElementById('intelMac').innerText = data.attacker_mac;
+                document.getElementById('intelVendor').innerText = data.attacker_vendor || "GENERIC DEVICE";
+            } else {
+                quickIntelBox.style.display = 'none';
+            }
+
+            const nmapBox = document.getElementById('nmapOutput');
+            if (data.nmap_data && data.nmap_data !== "Waiting...") {
+                nmapBox.innerText = data.nmap_data;
+                nmapBox.style.color = "#00aaff"; 
+            }
+
+            const logContainer = document.getElementById('liveLogs');
+            if (data.logs && data.logs.length > 0) {
+                logContainer.innerHTML = ''; 
+                data.logs.forEach(log => {
+                    const entry = document.createElement('div');
+                    entry.className = 'log-entry';
+                    if (log.toLowerCase().includes('failed') || log.toLowerCase().includes('invalid')) {
+                        entry.innerHTML = `<span class="log-warn">${log}</span>`;
+                    } else {
+                        entry.innerHTML = `<span>${log}</span>`;
+                    }
+                    logContainer.appendChild(entry);
+                });
+                logContainer.scrollTop = logContainer.scrollHeight;
+            }
+
+            // Global Alert State (Honeypot or Block)
+            const alertBox = document.getElementById('threatAlert');
+            const alertMsg = document.getElementById('alertMessage');
+            
+            if (data.blocked_count > 0 || isHoneypotBreached) {
+                document.body.classList.add('threat-active');
+                alertBox.style.display = 'flex'; 
+                document.getElementById('statusTextActive').innerText = "CRITICAL THREAT DETECTED";
+                document.getElementById('statusTextActive').style.color = "red";
+                
+                if (isHoneypotBreached) {
+                    alertMsg.innerText = "CRITICAL BREACH: HONEYPOT ACCESSED!";
+                } else {
+                    alertMsg.innerText = "CRITICAL THREAT DETECTED - FIREWALL ENGAGED";
+                }
+            } else {
+                document.body.classList.remove('threat-active');
+                alertBox.style.display = 'none';
+                document.getElementById('statusTextActive').innerText = "ACTIVE SCANNING";
+                document.getElementById('statusTextActive').style.color = "#00aaff";
+            }
+
+        } catch (error) {
+            console.error("Link Lost:", error);
+            document.getElementById('arduinoStatus').innerText = "WAITING...";
+            document.getElementById('arduinoStatus').style.color = "#aaa";
+        }
+    }, 1500); 
+</script>
+
+</body>
+</html>
